@@ -24,7 +24,11 @@ module ps2_rx(
     input logic clk,
     input logic nrst,
     input logic ps2d,
-    input logic  ps2c
+    input logic  ps2c,
+    input logic en,
+    output logic finished,
+    output logic[8:0] dout
+    
     );
     
     typedef enum logic[2:0] {IDLE=3'd0,START=3'd1,DATA=3'd2,STOP=3'd3} STATE; 
@@ -33,7 +37,8 @@ module ps2_rx(
     logic r_high_seen,next_high_seen;
     logic r_sampled,next_sampled;
     logic[8:0] r_dout,next_dout;
-    logic[2:0] r_bit_cout,next_bit_count;
+    logic[4:0] r_bit_count,next_bit_count;
+    logic r_finished,next_finished;
     
     always_ff @(posedge clk, negedge nrst)
     begin
@@ -43,7 +48,8 @@ module ps2_rx(
                 r_high_seen<=0;
                 r_sampled<=0;
                 r_dout<=0;
-                r_bit_count<=8;
+                r_bit_count<=9;
+                r_finished<=0;
             end
         else 
             begin
@@ -52,25 +58,28 @@ module ps2_rx(
                r_sampled<=next_sampled;
                r_dout<=next_dout;
                r_bit_count<=next_bit_count;
+               r_finished<=next_finished;
             end
     end
     
     
     always_comb
+
+        begin
         next_state=r_state;
         next_high_seen=r_high_seen;
         next_sampled=r_sampled;
         next_dout=r_dout;
-        next_bit_count=0;
-        begin
+        next_bit_count=r_bit_count;
+        next_finished=0;
             case (r_state)
                 IDLE:
                     begin
-                        if(!ps2c && !ps2d)
+                        if(!ps2c && !ps2d && en)
                             begin
                                 next_state=DATA;
                                 next_high_seen=0;
-                                next_bit_count=8;
+                                next_bit_count=9;
                                 next_sampled=0;
                             end
                     end
@@ -79,29 +88,31 @@ module ps2_rx(
                         if(!r_high_seen && ps2c)
                             begin
                                 next_high_seen=1;
+                                next_sampled=0;
                             end
                          else if (r_high_seen && !ps2c && !r_sampled)
                             begin
-                                next_sampled=1;
-                                next_dout={ps2d,r_dout[7:0]};
+                           
                                 if(r_bit_count==0)
                                     begin
                                         next_state=STOP;
-                                        next_high_seen=0;
+                                             next_high_seen=0;
                                     end
                                  else
+                                    begin
+                                          next_high_seen=0;
+                                next_sampled=1;
+                                next_dout={ps2d,r_dout[8:1]};
                                     next_bit_count=r_bit_count-1;
+                                    end
                             end
                     end
                  STOP:
                     begin
-                         if(!r_high_seen && ps2c)
+                         if(ps2c)
                            begin
-                                next_high_seen=1;
-                            end
-                         else if (r_high_seen && !ps2c)
-                            begin
-                                next_state=IDLE;
+                                    next_state=IDLE;
+                                next_finished=1;
                             end
                     end
                     
@@ -109,6 +120,7 @@ module ps2_rx(
         
      end
         
-        
+        assign finished=r_finished;
+        assign dout=r_dout;
     
 endmodule
