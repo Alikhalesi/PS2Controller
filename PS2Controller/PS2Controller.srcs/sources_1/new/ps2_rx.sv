@@ -23,8 +23,8 @@
 module ps2_rx(
     input logic clk,
     input logic nrst,
-    inout logic ps2d,
-    inout logic  ps2c,
+    input logic ps2d,
+    input logic  ps2c,
     input logic en,
     output logic finished,
     output logic[8:0] dout

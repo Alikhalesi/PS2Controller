@@ -47,6 +47,7 @@ module tb_top(
     logic ps2c_out = 1'b1;
     logic ps2d_out = 1'b1;
 
+logic btn;
     // Simulate open-drain pull-ups for PS/2 lines
     assign ps2c = ps2c_out ? 1'bZ : 1'b0;
     assign ps2d = ps2d_out ? 1'bZ : 1'b0;
@@ -59,7 +60,8 @@ module tb_top(
         .ps2d(ps2d),
         .sseg_data(sseg_data),
         .sseg_ctrl(sseg_ctrl),
-        .LED(LED)
+        .LED(LED),
+        .btn(btn)
     );
 
     // 3. Clock Generation (100 MHz)
@@ -120,7 +122,7 @@ module tb_top(
         nrst = 1'b0; 
         #(CLK_PERIOD * 5);
         nrst = 1'b1; // Release reset
-        #(CLK_PERIOD * 10); // Wait for reset_synchronizer stability
+   //     #(CLK_PERIOD * 10); // Wait for reset_synchronizer stability
 
         // Send a sequence of key codes (e.g., Key Make/Break)
         send_ps2_byte(8'h1C); // Example: 'A' key make code

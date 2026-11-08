@@ -39,18 +39,27 @@ debouncer btn_debouncer(.d(btn),.q(btn_debounced),.clk(clk),.nrst(synced_rst));
     logic btn_delayed;
      delay_signal btn_delay(.clk(clk),.nrst(nrst),.d(btn_debounced),.q(btn_delayed));
      
-     
-         logic [1:0] ps2c_sync, ps2d_sync;
-    always_ff @(posedge clk or negedge nrst) begin
-        if (!nrst) begin
-            ps2c_sync <= 2'b11;
-            ps2d_sync <= 2'b11;
-        end else begin
-            ps2c_sync <= {ps2c_sync[0], ps2c};
-            ps2d_sync <= {ps2d_sync[0], ps2d};
-        end
-    end
-     
+logic filtered_ps2c;
+logic filtered_ps2d;
+filter ps2c_filter
+(
+.clk(clk),
+.nrst(synced_rst),
+.p(ps2c),
+.q(filtered_ps2c)
+
+    );
+    
+    filter ps2d_filter
+(
+.clk(clk),
+.nrst(synced_rst),
+.p(ps2d),
+.q(filtered_ps2d)
+
+    );
+    
+
      
     logic rx_enabled;
     assign rx_enabled=1;
@@ -75,8 +84,8 @@ debouncer btn_debouncer(.d(btn),.q(btn_debounced),.clk(clk),.nrst(synced_rst));
     ps2_rx rx_instance(
     .clk(clk),
     .nrst(synced_rst),
-    .ps2d(ps2d_sync),
-    .ps2c(ps2c_sync),
+    .ps2d(filtered_ps2d),
+    .ps2c(filtered_ps2c),
     .en(rx_enabled),
     .finished(rx_finished),
     .dout(rx_dout)
