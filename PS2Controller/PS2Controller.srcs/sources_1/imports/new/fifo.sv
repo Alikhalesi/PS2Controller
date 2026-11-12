@@ -33,6 +33,11 @@ input logic[DATA_WIDTH-1:0] w_data,
 output logic empty,full,top_updated
     );
       
+
+      
+      
+      
+      
    logic [ADDR_WIDTH-1:0] r_pointer,w_pointer,next_r_pointer,next_w_pointer;
    logic full_reg,next_full_reg,empty_reg,next_empty_reg;
     logic r_top_updated,next_top_updated;
@@ -98,5 +103,14 @@ always_comb
     assign empty= empty_reg;
     assign full= full_reg;
     assign top_updated=r_top_updated;
+    
+    
+    
+          // jtag
+      jtag_reader jtag (
+    .reg_data({28'd0,32'd87})   // The register value from your OS2 receiver
+);
+      //
+    
     
 endmodule

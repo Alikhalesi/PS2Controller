@@ -41,23 +41,28 @@ debouncer btn_debouncer(.d(btn),.q(btn_debounced),.clk(clk),.nrst(synced_rst));
      
 logic filtered_ps2c;
 logic filtered_ps2d;
-filter ps2c_filter
-(
-.clk(clk),
-.nrst(synced_rst),
-.p(ps2c),
-.q(filtered_ps2c)
 
-    );
+assign  filtered_ps2c=ps2c;
+assign  filtered_ps2d=ps2d;
+
+
+//filter ps2c_filter
+//(
+//.clk(clk),
+//.nrst(synced_rst),
+//.p(ps2c),
+//.q(filtered_ps2c)
+
+//    );
     
-    filter ps2d_filter
-(
-.clk(clk),
-.nrst(synced_rst),
-.p(ps2d),
-.q(filtered_ps2d)
+//    filter ps2d_filter
+//(
+//.clk(clk),
+//.nrst(synced_rst),
+//.p(ps2d),
+//.q(filtered_ps2d)
 
-    );
+//    );
     
 
      
